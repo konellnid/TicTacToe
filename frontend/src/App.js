@@ -9,6 +9,7 @@ import Home from "./views/homePage";
 import Login from "./views/loginPage";
 import Register from "./views/registerPage";
 import PlayPage from "./views/playPage";
+import Statistics from "./views/statisticsPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               <Route component={Login} path="/login" />
               <Route component={Register} path="/register" />
               <PrivateRoute component={PlayPage} path="/play" />
+              <PrivateRoute component={Statistics} path="/statistics" />
               <Route component={Home} path="/" />
             </Switch>
           </AuthProvider>

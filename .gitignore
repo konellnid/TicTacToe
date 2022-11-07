@@ -4,3 +4,4 @@ backend/api/migrations/__pycache__/
 backend/backend/__pycache__/
 backend/venv/
 frontend/.idea/
+backend/backend/.env

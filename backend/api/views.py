@@ -109,11 +109,12 @@ def end_game(game: Game, end_state: str, was_x_move: bool, result: int):
     )
     game_history_entry.save()
 
-    awaiting_player = game.o_player if was_x_move else game.x_player
-    waiting_entry = PlayerAwaiter(awaiting_player=awaiting_player, game_from_history=game_history_entry)
+    waiting_entry_x = PlayerAwaiter(awaiting_player=game.x_player, game_from_history=game_history_entry)
+    waiting_entry_o = PlayerAwaiter(awaiting_player=game.o_player, game_from_history=game_history_entry)
 
     game_history_entry.save()
-    waiting_entry.save()
+    waiting_entry_x.save()
+    waiting_entry_o.save()
     game.delete()
 
     return game_history_entry
@@ -133,6 +134,9 @@ def getRoutes(request):
 @permission_classes([IsAuthenticated])
 def find_game_end_point(request):
     asking_user = request.user
+
+    # clear awaiting unseen finished games
+    PlayerAwaiter.objects.filter(awaiting_player=asking_user).delete()
 
     if len(Game.objects.filter(Q(o_player=asking_user) | Q(x_player=asking_user))) > 0:
         response_data = create_find_game_info_dictionary(False, True, 'Player already in game.')
@@ -179,7 +183,6 @@ def current_game(request):
             response_data = create_game_info_dictionary(awaiting_entry.game_from_history.end_state, False, False, True,
                                                         awaiting_entry.game_from_history.end_date,
                                                         awaiting_entry.game_from_history.result, False)
-            awaiting_entry.delete()
             return Response(response_data, status=status.HTTP_200_OK)
 
     is_x_asking = user_game.x_player == asking_user
@@ -224,7 +227,7 @@ def make_move(request):
     updated_state: str = change_game_state(move_index, user_game.current_state, symbol)
 
     if is_move_winning(move_index, updated_state, symbol):
-        # correct, winning moe
+        # correct, winning move
         result = X_WON_RESULT if is_x_move else O_WON_RESULT
         game_history_entry = end_game(user_game, updated_state, is_x_move, result)
         response_data = create_game_info_dictionary(game_history_entry.end_state, False, False, True,

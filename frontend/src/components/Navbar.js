@@ -1,25 +1,27 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import {useContext} from "react";
+import {Link} from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 
 const Navbar = () => {
-    const { user, logoutUser } = useContext(AuthContext);
+    const {user, logoutUser} = useContext(AuthContext);
     return (
         <nav>
             <div>
-                <h1>App Name</h1>
+                <h1>TicTacToe</h1>
                 <div>
                     {user ? (
-                        <>
-                            <Link to="/">Home</Link>
-                            <Link to="/protected">Protected Page</Link>
-                            <button onClick={logoutUser}>Logout</button>
-                        </>
+                        <ul>
+                            <li><Link to="/">Home</Link></li>
+                            <li><Link to="/play">Play</Link></li>
+                            <li>
+                                <button onClick={logoutUser}>Logout</button>
+                            </li>
+                        </ul>
                     ) : (
-                        <>
-                            <Link to="/login">Login</Link>
-                            <Link to="/register">Register</Link>
-                        </>
+                        <ul>
+                            <li><Link to="/login">Login</Link></li>
+                            <li><Link to="/register">Register</Link></li>
+                        </ul>
                     )}
                 </div>
             </div>

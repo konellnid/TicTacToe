@@ -83,6 +83,15 @@ def create_game_info_dictionary(game_state: str, is_player_move: bool, is_x_move
     return response_data
 
 
+def create_find_game_info_dictionary(is_player_in_queue: bool, is_player_in_game: bool, description: str):
+    response_data = {
+        'is_player_in_queue': is_player_in_queue,
+        'is_player_in_game': is_player_in_game,
+        'description': description
+    }
+    return response_data
+
+
 def change_game_state(move_place: int, current_state: str, symbol: str):
     temp_state_list = list(current_state)
     temp_state_list[move_place] = symbol
@@ -126,14 +135,16 @@ def find_game_end_point(request):
     asking_user = request.user
 
     if len(Game.objects.filter(Q(o_player=asking_user) | Q(x_player=asking_user))) > 0:
-        return Response({'response': 'Player is already in game'}, status=status.HTTP_200_OK)
+        response_data = create_find_game_info_dictionary(False, True, 'Player already in game.')
+        return Response(response_data, status=status.HTTP_200_OK)
 
     queue = Queue.objects.all()
 
     if len(queue) == 0:
         new_queue_entity = Queue(waiting_player=asking_user)
         new_queue_entity.save()
-        return Response({'response': 'Player added to queue'}, status=status.HTTP_200_OK)
+        response_data = create_find_game_info_dictionary(True, False, 'Player added to queue.')
+        return Response(response_data, status=status.HTTP_200_OK)
 
     for queue_entity in queue:
         if asking_user.id != queue_entity.waiting_player.id:
@@ -145,10 +156,12 @@ def find_game_end_point(request):
             new_game = Game(x_player=players_list[0], o_player=players_list[1])
             new_game.save()
 
-            return Response({'response': "Game created"}, status=status.HTTP_200_OK)
+            response_data = create_find_game_info_dictionary(False, True, 'Game created.')
+            return Response(response_data, status=status.HTTP_200_OK)
 
     # only asking player is waiting in queue
-    return Response({'response': "Player is already waiting in queue"}, status.HTTP_200_OK)
+    response_data = create_find_game_info_dictionary(True, False, 'Waiting in queue...')
+    return Response(response_data, status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -188,7 +201,7 @@ def make_move(request):
     if user_game is None:
         return Response({'response': 'Player is not in game'}, status=status.HTTP_400_BAD_REQUEST)
 
-    move_place_string = request.POST.get('move_index', '')
+    move_place_string = request.data.get('move_index', '')
     try:
         move_index = int(move_place_string)
     except ValueError:
@@ -254,6 +267,7 @@ def statistics(request):
             statistics_by_id[history_game.x_player_id][1] += 1
             statistics_by_id[history_game.o_player_id][1] += 1
 
+    # change from user_id to username
     statistics_by_username = dict()
     for user in User.objects.all():
         statistics_by_username[user.username] = statistics_by_id[user.id]

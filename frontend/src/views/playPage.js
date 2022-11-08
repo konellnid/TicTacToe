@@ -78,6 +78,7 @@ function PlayPage() {
                     if (response.data['is_game_finished'] === true) {
                         await updateStatesFromGameInfo(response.data)
                     } else {
+                        await updateStatesFromGameInfo(response.data)
                         setTimeout(() => {
                             currentGame();
                         }, TEN_SECONDS_IN_MS)

@@ -25,7 +25,7 @@ const CellStyle = {
 
 function PlayPage() {
     const [res, setRes] = useState("");
-    const [info, setInfo] = useState("")
+    const [queueInfo, setQueueInfo] = useState("")
     const [isGameActive, setIsGameActive] = useState(false)
     const [gameState, setGameState] = useState("_________")
     const [isPlayerMove, setIsPlayerMove] = useState(false)
@@ -44,15 +44,21 @@ function PlayPage() {
         setResult(json_data['result'])
         setIsPlayerWinner(json_data['is_player_winner'])
         setIsGameFinished(json_data['is_game_finished'])
+        console.log()
+        console.log(isGameFinished)
+    }
+
+    const decideOnCurrentGame = async () => {
+
     }
 
     const currentGame = async () => {
         try {
             const response = await api.get("/current_game/")
             await updateStatesFromGameInfo(response.data)
-            if (!isGameFinished) {
+            if (!response.data['is_game_finished']) {
                 setIsGameActive(true)
-                if (!isPlayerMove) {
+                if (!response.data['is_player_move']) {
                     setTimeout(() => {
                         currentGame();
                     }, TEN_SECONDS_IN_MS)
@@ -72,7 +78,9 @@ function PlayPage() {
                     if (response.data['is_game_finished'] === true) {
                         await updateStatesFromGameInfo(response.data)
                     } else {
-                        await currentGame()
+                        setTimeout(() => {
+                            currentGame();
+                        }, TEN_SECONDS_IN_MS)
                     }
                 }
             } catch {
@@ -85,7 +93,7 @@ function PlayPage() {
             try {
                 const response = await api.post("/find_game/");
                 setRes(response.data.response);
-                setInfo(response.data['description'])
+                setQueueInfo(response.data['description'])
                 if (response.data['is_player_in_queue']) {
                     setTimeout(() => {
                         fetchData();
@@ -102,7 +110,7 @@ function PlayPage() {
     }, []);
 
     return (<div>
-        <p>{info}</p>
+        {isGameFinished || isGameActive ? <p>Good luck</p> : <p>{queueInfo}</p>}
         <div style={{display: isGameActive ? 'block' : 'none'}}>
             {isGameFinished ? <div>{isPlayerWinner ? 'You won' : (result === 0) ? 'Draw' : 'You lost'}</div> :
                 <div>Currently moving: {isXMove ? 'x' : 'o'} ({isPlayerMove ? 'You' : 'Opponent'})</div>}
@@ -110,10 +118,7 @@ function PlayPage() {
                 <table>
                     <tbody>
                     <tr>
-                        <td style={CellStyle} onClick={() => {
-                            makeMove(0);
-                            console.log(0)
-                        }}>{gameState[0]}</td>
+                        <td style={CellStyle} onClick={() => makeMove(0)}>{gameState[0]}</td>
                         <td style={CellStyle} onClick={() => makeMove(1)}>{gameState[1]}</td>
                         <td style={CellStyle} onClick={() => makeMove(2)}>{gameState[2]}</td>
                     </tr>

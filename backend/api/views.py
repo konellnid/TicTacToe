@@ -152,13 +152,13 @@ def find_game_end_point(request):
 
     for queue_entity in queue:
         if asking_user.id != queue_entity.waiting_player.id:
-            Queue.objects.filter(waiting_player=asking_user).delete()
-            Queue.objects.filter(waiting_player=queue_entity.waiting_player).delete()
-
             players_list = [asking_user, queue_entity.waiting_player]
             random.shuffle(players_list)
             new_game = Game(x_player=players_list[0], o_player=players_list[1])
             new_game.save()
+
+            Queue.objects.filter(waiting_player=asking_user).delete()
+            Queue.objects.filter(waiting_player=queue_entity.waiting_player).delete()
 
             response_data = create_find_game_info_dictionary(False, True, 'Game created.')
             return Response(response_data, status=status.HTTP_200_OK)
@@ -180,9 +180,12 @@ def current_game(request):
         if awaiting_entry is None:
             return Response({'response': 'Player is not in game'}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            awaited_game = awaiting_entry.game_from_history
+            is_player_winner = (awaited_game.result == 1 and awaited_game.x_player == asking_user) or (
+                        awaited_game.result == -1 and awaited_game.o_player == asking_user)
             response_data = create_game_info_dictionary(awaiting_entry.game_from_history.end_state, False, False, True,
                                                         awaiting_entry.game_from_history.end_date,
-                                                        awaiting_entry.game_from_history.result, False)
+                                                        awaiting_entry.game_from_history.result, is_player_winner)
             return Response(response_data, status=status.HTTP_200_OK)
 
     is_x_asking = user_game.x_player == asking_user

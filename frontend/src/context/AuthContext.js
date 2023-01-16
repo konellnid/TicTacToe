@@ -6,7 +6,8 @@ const AuthContext = createContext();
 
 export default AuthContext;
 
-const baseURL = process.env.REACT_APP_API_ENDPOINT.toString();
+// const baseURL = process.env.REACT_APP_API_ENDPOINT.toString();
+const baseURL = `http://${window.location.hostname}:80//api`;
 
 export const AuthProvider = ({ children }) => {
     const [authTokens, setAuthTokens] = useState(() =>

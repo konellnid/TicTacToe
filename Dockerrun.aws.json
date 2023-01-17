@@ -1,0 +1,34 @@
+{
+    "AWSEBDockerrunVersion": 2,
+        "containerDefinitions": [
+      {
+        "name": "service-api",
+        "image": "928289140815.dkr.ecr.us-east-1.amazonaws.com/tictactoe_backend:latest",
+        "hostname": "service-api",
+        "essential": true,
+        "memory": 256
+      },
+      {
+        "name": "service-frontend",
+        "image": "928289140815.dkr.ecr.us-east-1.amazonaws.com/tictactoe_frontend:latest",
+        "hostname": "service-frontend",
+        "essential": true,
+        "memory": 512
+      },
+      {
+        "name": "service-router",
+        "image": "928289140815.dkr.ecr.us-east-1.amazonaws.com/tictactoe_router:latest",
+        "hostname": "service-router",
+        "essential": true,
+        "portMappings": [
+            {
+                "hostPort": 80,
+                "containerPort": 80
+            }
+        ],
+        "links": ["service-api", "service-frontend"],
+        "memory": 128
+      }
+    ]
+  }
+  

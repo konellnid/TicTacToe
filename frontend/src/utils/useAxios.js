@@ -5,7 +5,7 @@ import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
 // const baseURL = process.env.REACT_APP_API_ENDPOINT.toString();
-const baseURL = `http://${window.location.hostname}:8000/api`;
+const baseURL = `http://${window.location.hostname}/api`;
 
 const useAxios = () => {
     const { authTokens, setUser, setAuthTokens } = useContext(AuthContext);
